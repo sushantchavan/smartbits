@@ -1,8 +1,20 @@
+module.exports = function(app) {
 
-/*
- * GET home page.
- */
+    app.get('/', function(req, res, next) {
+        res.render('index.jade', {
+            'nav': 'home'
+        });
+    });
 
-exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
-};
+    app.get('/case1', function(req, res, next) {
+        res.render('case1.jade', {
+            'nav': 'home'
+        });
+    });
+
+    app.get('/case2', function(req, res, next) {
+        res.render('case2.jade', {
+            'nav': 'home'
+        });
+    });
+}

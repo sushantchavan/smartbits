@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -8,6 +7,8 @@ var routes = require('./routes');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
+var cookieParser = require('cookie-parser')
+var session = require('express-session')
 
 var app = express();
 
@@ -26,12 +27,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+    app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
-app.get('/users', user.list);
+app.use(cookieParser()) // required before session.
+app.use(session({
+    secret: 'keyboard cat',
+    proxy: true, // if you do SSL outside of node.
+    cookie: {
+        secure: true
+    }
+}))
+app.use(function(req, res, next) {
+    var csrf = express.csrf();
+    if (req.url.indexOf('/api/') != -1 && req.url.indexOf('/model/') == -1) {
+        next();
+    } else {
+        csrf(req, res, next);
+    }
+});
+//app.use(everyauth.middleware(app));
+app.use(app.router);
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+
+app.get('/', function(req, res, next) {
+    next();
+
+});
+//app.get('/users', user.list);
+require('./routes')(app);
+http.createServer(app).listen(app.get('port'), function() {
+    console.log('Express server listening on port ' + app.get('port'));
 });
